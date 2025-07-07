@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import pdfParse from "pdf-parse";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import mammoth from "mammoth";
 import fs from "fs";
 
@@ -117,7 +117,7 @@ Instructions:
 `;
 
 /**
- * Extract text from PDF file
+ * Extract text from PDF file using pdfjs-dist (serverless-friendly)
  */
 export const extractTextFromPDF = async (filePath) => {
   try {
@@ -131,31 +131,52 @@ export const extractTextFromPDF = async (filePath) => {
       throw new Error("PDF file is empty");
     }
 
-    // Try parsing with different options for better compatibility
-    const parseOptions = {
-      // Normalize whitespace and handle encoding issues
-      normalizeWhitespace: true,
-      // Don't stop on first error
-      stopAtFirstError: false,
-      // Maximum pages to parse (prevent memory issues)
-      max: 50
-    };
+    // Load PDF document using pdfjs-dist
+    const loadingTask = pdfjsLib.getDocument({
+      data: dataBuffer,
+      verbosity: 0, // Suppress console output
+    });
 
-    const data = await pdfParse(dataBuffer, parseOptions);
+    const pdf = await loadingTask.promise;
+    let fullText = "";
 
-    if (!data.text || data.text.trim().length === 0) {
+    // Extract text from each page (limit to 50 pages for performance)
+    const maxPages = Math.min(pdf.numPages, 50);
+
+    for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
+      try {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+
+        // Combine text items with spaces
+        const pageText = textContent.items
+          .map(item => item.str)
+          .join(' ')
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .trim();
+
+        if (pageText) {
+          fullText += pageText + '\n';
+        }
+      } catch (pageError) {
+        console.warn(`Error extracting text from page ${pageNum}:`, pageError.message);
+        // Continue with other pages
+      }
+    }
+
+    if (!fullText || fullText.trim().length === 0) {
       throw new Error("No readable text found in PDF. The file might be image-based or corrupted.");
     }
 
-    return data.text;
+    return fullText.trim();
   } catch (error) {
     console.error("Error extracting text from PDF:", error);
 
     // Handle specific PDF parsing errors
-    if (error.message.includes("bad XRef entry") ||
-        error.message.includes("Invalid PDF") ||
-        error.message.includes("FormatError")) {
-      throw new Error("This PDF file has formatting issues that prevent text extraction. Please try one of these solutions: 1) Upload the resume as a DOCX file instead, 2) Save/export your PDF from a different application, or 3) Try a different PDF file.");
+    if (error.message.includes("Invalid PDF") ||
+        error.message.includes("FormatError") ||
+        error.message.includes("bad XRef")) {
+      throw new Error("This PDF file has formatting issues that prevent text extraction. Please try uploading a DOCX file instead or save your PDF from a different application.");
     }
 
     if (error.message.includes("Password") || error.message.includes("encrypted")) {

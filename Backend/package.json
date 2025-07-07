@@ -25,7 +25,6 @@
     "mammoth": "^1.9.1",
     "mongoose": "^8.5.1",
     "multer": "^2.0.1",
-    "pdf-parse": "^1.1.1",
     "pdfjs-dist": "^5.3.93"
   },
   "devDependencies": {
