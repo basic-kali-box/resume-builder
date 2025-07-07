@@ -1,5 +1,11 @@
 import React from "react";
 
+// Utility function to convert markdown bold to HTML
+const convertMarkdownToHTML = (text) => {
+  if (!text) return '';
+  return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+};
+
 function EducationalPreview({ resumeInfo }) {
   return (
     <div className="my-6">
@@ -11,7 +17,7 @@ function EducationalPreview({ resumeInfo }) {
               color: resumeInfo?.themeColor,
             }}
           >
-            Education
+            Formations
           </h2>
           <hr
             style={{
@@ -44,7 +50,10 @@ function EducationalPreview({ resumeInfo }) {
           <div className="text-xs">
             {education?.grade ? `${education?.gradeType} - ${education?.grade}` : null}
           </div>
-          <p className="text-xs my-2">{education?.description}</p>
+          <div
+            className="text-xs my-2"
+            dangerouslySetInnerHTML={{ __html: convertMarkdownToHTML(education?.description) }}
+          />
         </div>
       ))}
     </div>

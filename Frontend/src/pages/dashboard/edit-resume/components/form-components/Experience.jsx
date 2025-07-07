@@ -86,7 +86,14 @@ function Experience({ resumeInfo, enanbledNext, enanbledPrev }) {
     if (resume_id) {
       console.log("Started Updating Experience");
       updateThisResume(resume_id, data)
-        .then((data) => {
+        .then((resp) => {
+          console.log(resp);
+
+          // Update Redux store with the complete updated resume data
+          if (resp && resp.data) {
+            dispatch(addResumeData(resp.data));
+          }
+
           toast("Resume Updated", "success");
         })
         .catch((error) => {
@@ -103,7 +110,7 @@ function Experience({ resumeInfo, enanbledNext, enanbledPrev }) {
     <div>
       <div className="p-5 shadow-lg rounded-lg border-t-primary border-t-4 mt-10">
         <h2 className="font-bold text-lg">Experience</h2>
-        <p>Add Your Previous Job Experience</p>
+        <p>Add your work experience details first, then use AI to enhance your descriptions</p>
         <div>
           {experienceList?.map((experience, index) => (
             <div key={index}>

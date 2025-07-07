@@ -52,6 +52,12 @@ function PersonalDetails({ resumeInfo, enanbledNext }) {
     if (resume_id) {
       try {
         const response = await updateThisResume(resume_id, data);
+
+        // Update Redux store with the complete updated resume data
+        if (response && response.data) {
+          dispatch(addResumeData(response.data));
+        }
+
         toast("Resume Updated", "success");
       } catch (error) {
         toast(error.message, `failed`);

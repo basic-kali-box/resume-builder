@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "name": "ai-resume-builder-backend",
+  "builds": [
+    {
+      "src": "src/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "src/index.js"
+    }
+  ],
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "JWT_SECRET": "@jwt_secret",
+    "GEMINI_API_KEY": "@gemini_api_key",
+    "ALLOWED_SITE": "@allowed_site",
+    "PORT": "5001"
+  },
+  "functions": {
+    "src/index.js": {
+      "maxDuration": 30
+    }
+  }
+}

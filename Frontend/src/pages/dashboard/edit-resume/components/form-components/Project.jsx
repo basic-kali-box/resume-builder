@@ -71,7 +71,14 @@ function Project({ resumeInfo, setEnabledNext, setEnabledPrev }) {
     if (resume_id) {
       console.log("Started Updating Project");
       updateThisResume(resume_id, data)
-        .then((data) => {
+        .then((resp) => {
+          console.log(resp);
+
+          // Update Redux store with the complete updated resume data
+          if (resp && resp.data) {
+            dispatch(addResumeData(resp.data));
+          }
+
           toast("Resume Updated", "success");
         })
         .catch((error) => {
@@ -88,7 +95,7 @@ function Project({ resumeInfo, setEnabledNext, setEnabledPrev }) {
   return (
     <div className="p-5 shadow-lg rounded-lg border-t-primary border-t-4 mt-10">
       <h2 className="font-bold text-lg">Project</h2>
-      <p>Add your projects</p>
+      <p>Add your project details first, then use AI to enhance your descriptions</p>
       <div>
         {projectList?.map((project, index) => (
           <div key={index}>
@@ -117,7 +124,7 @@ function Project({ resumeInfo, setEnabledNext, setEnabledPrev }) {
                 />
               </div>
               <div>
-                <label className="text-xs">Company Name</label>
+                <label className="text-xs">Tech Stack</label>
                 <Input
                   type="text"
                   name="techStack"

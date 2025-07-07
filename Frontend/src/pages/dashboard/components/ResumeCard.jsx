@@ -27,7 +27,7 @@ const getRandomGradient = () => {
   return gradients[Math.floor(Math.random() * gradients.length)];
 };
 
-function ResumeCard({ resume, refreshData }) {
+function ResumeCard({ resume, refreshData, onSelect, isSelected }) {
   const [loading, setLoading] = React.useState(false);
   const [openAlert, setOpenAlert] = React.useState(false);
   const gradient = getRandomGradient();
@@ -49,57 +49,93 @@ function ResumeCard({ resume, refreshData }) {
   };
   return (
     <div
-      className={`p-5 bg-gradient-to-r ${gradient} h-[380px] sm:h-auto rounded-lg flex flex-col justify-between shadow-lg transition duration-300 ease-in-out cursor-pointer hover:shadow-xl`}
+      className={`relative p-4 bg-white rounded-lg border-2 transition-all duration-300 ease-in-out cursor-pointer hover:shadow-lg ${
+        isSelected
+          ? 'border-blue-500 shadow-lg ring-2 ring-blue-200'
+          : 'border-gray-200 hover:border-gray-300'
+      }`}
+      onClick={() => onSelect && onSelect(resume._id)}
     >
-      <div className="flex items-center justify-center p-6 bg-white rounded-t-lg shadow-md">
-        <h2
-          className={`text-center font-bold text-md mx-2 bg-clip-text text-transparent bg-gradient-to-r ${gradient}`}
-        >
+      {/* Selection indicator */}
+      {isSelected && (
+        <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+          <div className="w-2 h-2 bg-white rounded-full"></div>
+        </div>
+      )}
+
+      {/* Resume title with theme color accent */}
+      <div className="mb-4">
+        <div
+          className="h-2 rounded-t-lg mb-3"
+          style={{ backgroundColor: resume.themeColor || '#000000' }}
+        ></div>
+        <h3 className="font-semibold text-lg text-gray-800 text-center mb-2">
           {resume.title}
-        </h2>
+        </h3>
+        <p className="text-sm text-gray-500 text-center">
+          Created {new Date(resume.createdAt).toLocaleDateString()}
+        </p>
       </div>
-      <div className="flex items-center justify-around p-4 bg-white rounded-b-lg shadow-md">
+
+      {/* Action buttons */}
+      <div className="flex items-center justify-center gap-2 pt-3 border-t border-gray-100">
         <Button
           variant="ghost"
-          onClick={() => navigate(`/dashboard/view-resume/${resume._id}`)}
-          className="mx-2"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/dashboard/view-resume/${resume._id}`);
+          }}
+          className="flex-1 text-xs"
         >
-          <FaEye className="text-gray-600 hover:text-indigo-600 transition duration-300 ease-in-out" />
+          <FaEye className="mr-1" />
+          View
         </Button>
         <Button
           variant="ghost"
-          onClick={() => navigate(`/dashboard/edit-resume/${resume._id}`)}
-          className="mx-2"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/dashboard/edit-resume/${resume._id}`);
+          }}
+          className="flex-1 text-xs"
         >
-          <FaEdit className="text-gray-600 hover:text-purple-600 transition duration-300 ease-in-out" />
+          <FaEdit className="mr-1" />
+          Edit
         </Button>
         <Button
           variant="ghost"
-          onClick={() => setOpenAlert(true)}
-          className="mx-2"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpenAlert(true);
+          }}
+          className="text-red-600 hover:text-red-700 hover:bg-red-50"
         >
-          <FaTrashAlt className="text-gray-600 hover:text-pink-600 transition duration-300 ease-in-out" />
+          <FaTrashAlt />
         </Button>
-        <AlertDialog open={openAlert} onClose={() => setOpenAlert(false)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your
-                Resume and remove your data from our servers.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setOpenAlert(false)}>
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} disabled={loading}>
-                {loading ? <FaSpinner className="animate-spin" /> : "Delete"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={openAlert} onClose={() => setOpenAlert(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your
+              resume "{resume.title}" and remove your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setOpenAlert(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={loading}>
+              {loading ? <FaSpinner className="animate-spin" /> : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

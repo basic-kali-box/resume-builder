@@ -90,18 +90,28 @@ function AuthPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-gradient-to-r from-green-400 to-purple-500">
+    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-gradient-to-br from-slate-50 to-blue-50">
       <motion.div
-        className="relative w-full max-w-md p-8 bg-white rounded-lg shadow-lg"
+        className="relative w-full max-w-md p-8 bg-white rounded-xl shadow-xl border border-gray-100"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-lg">AR</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">AI Resume Builder</h1>
+          <p className="text-gray-600 text-sm mt-1">Create your professional resume</p>
+        </div>
         <div className="flex justify-around mb-6 border-b border-gray-200">
           <button
             onClick={() => setIsSignUp(false)}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors duration-300 rounded-t-lg ${
-              !isSignUp ? "bg-green-400 text-white" : "text-gray-600"
+            className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-t-lg ${
+              !isSignUp
+                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
             }`}
           >
             <FaSignInAlt />
@@ -109,8 +119,10 @@ function AuthPage() {
           </button>
           <button
             onClick={() => setIsSignUp(true)}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors duration-300 rounded-t-lg ${
-              isSignUp ? "bg-green-400 text-white" : "text-gray-600"
+            className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-t-lg ${
+              isSignUp
+                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
             }`}
           >
             <FaUserPlus />
@@ -131,24 +143,24 @@ function AuthPage() {
           >
             <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
             <form onSubmit={handleSignUpSubmit} className="space-y-4">
-              <div className="flex items-center border rounded-md border-gray-300 p-2 gap-3">
-                <FaUser className="text-gray-400 mr-2" />
+              <div className="flex items-center border border-gray-200 rounded-lg p-3 gap-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200">
+                <FaUser className="text-gray-400" />
                 <input
                   type="text"
                   name="fullname"
                   placeholder="Full Name"
                   required
-                  className="outline-none w-full"
+                  className="outline-none w-full text-gray-900 placeholder-gray-500"
                 />
               </div>
-              <div className="flex items-center border rounded-md border-gray-300 p-2 gap-3">
-                <FaUser className="text-gray-400 mr-2" />
+              <div className="flex items-center border border-gray-200 rounded-lg p-3 gap-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200">
+                <FaUser className="text-gray-400" />
                 <input
                   type="email"
                   name="email"
                   placeholder="Email"
                   required
-                  className="outline-none w-full"
+                  className="outline-none w-full text-gray-900 placeholder-gray-500"
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}
                 />

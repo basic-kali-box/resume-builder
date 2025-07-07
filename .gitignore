@@ -1,36 +1,82 @@
-# Node.js dependencies
-/node_modules
+# Dependencies
+node_modules/
+*/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Build files
-/build
-/dist
+# Build outputs
+build/
+dist/
+*/build/
+*/dist/
+.next/
+out/
 
 # Environment variables
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*/.env
+*/.env.local
 
 # Logs
-/logs
+logs/
+*.log
+*/logs/
 
-# Cache
-/.cache
+# Cache directories
+.cache/
+.parcel-cache/
+.vite/
+*/.cache/
 
-# Dependency lock files
-/yarn.lock
-/package-lock.json
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# Editor files
-.vscode
-.idea
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
 
-# Strapi specific files
-/api/*/node_modules
-/api/*/build
-/api/*/dist
-/api/*/logs
-/api/*/yarn.lock
-/api/*/package-lock.json
-/api/*/.env
+# Vercel
+.vercel/
 
-# React specific files
-/public/build
-/public/.env
+# Upload directories
+Backend/uploads/
+Frontend/uploads/
+uploads/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+
+# Coverage
+coverage/
+*.lcov
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock

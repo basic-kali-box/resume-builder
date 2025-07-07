@@ -1,6 +1,7 @@
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import Resume from "../models/resume.model.js";
+import { processResumeFile } from "../services/fileExtraction.service.js";
 
 const start = async (req, res) => {
   return res
@@ -101,15 +102,40 @@ const getResume = async (req, res) => {
 
 const updateResume = async (req, res) => {
   console.log("Resume update request received:");
+  console.log("Request ID:", req.query.id);
+  console.log("Request body:", JSON.stringify(req.body, null, 2));
   const id = req.query.id;
 
   try {
+    // Validate skills limit if skills are being updated
+    if (req.body.skills && req.body.skills.length > 3) {
+      return res
+        .status(400)
+        .json(new ApiError(400, "Maximum 3 skills allowed"));
+    }
+
     // Find and update the resume with the provided ID and user ID
     console.log("Database update request started");
+
+    // Build update object with only the fields that are being updated
+    const updateObject = { $currentDate: { updatedAt: true } };
+
+    // Only set fields that are actually present in the request body
+    if (Object.keys(req.body).length > 0) {
+      updateObject.$set = {};
+
+      // Safely update only the fields that are provided
+      Object.keys(req.body).forEach(key => {
+        updateObject.$set[key] = req.body[key];
+      });
+    }
+
+    console.log("Update object:", JSON.stringify(updateObject, null, 2));
+
     const updatedResume = await Resume.findOneAndUpdate(
       { _id: id, user: req.user._id },
-      { $set: req.body, $currentDate: { updatedAt: true } }, // Set updatedAt to current date
-      { new: true } // Return the modified document
+      updateObject,
+      { new: true, runValidators: true } // Return the modified document and run validators
     );
 
     if (!updatedResume) {
@@ -169,9 +195,118 @@ const removeResume = async (req, res) => {
   }
 };
 
+const createResumeFromUpload = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res
+        .status(400)
+        .json(new ApiError(400, "No file uploaded. Please upload a PDF or DOCX file."));
+    }
+
+    const { title } = req.body;
+    if (!title) {
+      return res
+        .status(400)
+        .json(new ApiError(400, "Resume title is required."));
+    }
+
+    console.log("Processing uploaded file:", req.file.filename);
+    console.log("File path:", req.file.path);
+    console.log("File mimetype:", req.file.mimetype);
+
+    // Process the uploaded file and extract data
+    let extractionResult;
+    try {
+      extractionResult = await processResumeFile(req.file.path, req.file.mimetype);
+    } catch (extractionError) {
+      console.error("File extraction error:", extractionError);
+
+      // Provide user-friendly error messages with guidance
+      let userMessage = extractionError.message;
+      let statusCode = 400;
+
+      // Handle AI service issues specifically
+      if (extractionError.message.includes("AI service is currently experiencing") ||
+          extractionError.message.includes("overloaded") ||
+          extractionError.message.includes("quota exceeded") ||
+          extractionError.message.includes("Network error")) {
+        statusCode = 503;
+        userMessage = "AI resume processing is temporarily unavailable. Please try again in a few minutes, or create your resume manually using the 'Create New Resume' option.";
+      } else if (extractionError.message.includes("AI extraction failed")) {
+        statusCode = 503;
+        userMessage = "Resume processing is currently unavailable. Please create your resume manually using the 'Create New Resume' option and add your information step by step.";
+      }
+
+      return res
+        .status(statusCode)
+        .json(new ApiError(statusCode, userMessage, [], {
+          suggestion: "Use the 'Create New Resume' option to build your resume manually",
+          canRetry: statusCode === 503
+        }));
+    }
+
+    if (!extractionResult.success) {
+      return res
+        .status(500)
+        .json(new ApiError(500, "Failed to extract data from the uploaded file."));
+    }
+
+    const { structuredData } = extractionResult;
+
+    // Create resume with extracted data
+    const resumeData = {
+      title,
+      themeColor: "#000000", // Default theme color
+      user: req.user._id,
+      // Personal details
+      firstName: structuredData.personalDetails.firstName,
+      lastName: structuredData.personalDetails.lastName,
+      email: structuredData.personalDetails.email,
+      phone: structuredData.personalDetails.phone,
+      address: structuredData.personalDetails.address,
+      jobTitle: structuredData.personalDetails.jobTitle,
+      // Other sections
+      summary: structuredData.summary,
+      experience: structuredData.experience,
+      education: structuredData.education,
+      skills: structuredData.skills,
+      projects: structuredData.projects,
+    };
+
+    const resume = await Resume.create(resumeData);
+
+    return res
+      .status(201)
+      .json(new ApiResponse(201, {
+        resume,
+        extractedData: structuredData
+      }, "Resume created successfully from uploaded file"));
+
+  } catch (error) {
+    console.error("Error creating resume from upload:", error);
+
+    // Clean up file if it still exists
+    if (req.file && req.file.path) {
+      try {
+        const fs = await import('fs');
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+      } catch (cleanupError) {
+        console.error("Error cleaning up file:", cleanupError);
+      }
+    }
+
+    return res
+      .status(500)
+      .json(new ApiError(500, error.message || "Internal Server Error", [error.message], error.stack));
+  }
+};
+
 export {
   start,
   createResume,
+  createResumeFromUpload,
   getALLResume,
   getResume,
   updateResume,

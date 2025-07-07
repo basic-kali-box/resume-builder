@@ -27,10 +27,34 @@ const resumeSchema = new mongoose.Schema({
       type: educationSchema,
     },
   ],
-  skills: [
+  skills: {
+    type: [
+      {
+        name: { type: String },
+        rating: { type: Number },
+      },
+    ],
+    validate: {
+      validator: function(skills) {
+        return skills.length <= 3;
+      },
+      message: 'Maximum 3 skills allowed'
+    }
+  },
+  certifications: [
     {
       name: { type: String },
-      rating: { type: Number },
+      issuingOrganization: { type: String },
+      issueDate: { type: String },
+      expirationDate: { type: String },
+    },
+  ],
+  educationTraining: [
+    {
+      courseName: { type: String },
+      institution: { type: String },
+      completionDate: { type: String },
+      description: { type: String },
     },
   ],
   projects: [

@@ -7,6 +7,8 @@ import Experience from "./form-components/Experience";
 import Education from "./form-components/Education";
 import Skills from "./form-components/Skills";
 import Project from "./form-components/Project";
+import Certifications from "./form-components/Certifications";
+import EducationTraining from "./form-components/EducationTraining";
 import { ArrowLeft, ArrowRight, HomeIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import ThemeColor from "./ThemeColor";
@@ -22,9 +24,9 @@ function ResumeForm() {
       setEnabledPrev(false);
     } else if (currentIndex == 1) {
       setEnabledPrev(true);
-    } else if (currentIndex === 4) {
+    } else if (currentIndex === 6) {
       setEnabledNext(true);
-    } else if (currentIndex === 5) {
+    } else if (currentIndex === 7) {
       setEnabledNext(false);
     }
   }, [currentIndex]);
@@ -109,6 +111,20 @@ function ResumeForm() {
         />
       )}
       {currentIndex === 5 && (
+        <Certifications
+          resumeInfo={resumeInfo}
+          enabledNext={setEnabledNext}
+          enabledPrev={setEnabledPrev}
+        />
+      )}
+      {currentIndex === 6 && (
+        <EducationTraining
+          resumeInfo={resumeInfo}
+          enabledNext={setEnabledNext}
+          enabledPrev={setEnabledPrev}
+        />
+      )}
+      {currentIndex === 7 && (
         <Skills
           resumeInfo={resumeInfo}
           enanbledNext={setEnabledNext}

@@ -76,10 +76,30 @@ const deleteThisResume = async (resumeID) => {
   }
 };
 
+const createResumeFromUpload = async (formData) => {
+  try {
+    const response = await axiosInstance.post(
+      "resumes/createResumeFromUpload",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error?.response?.data?.message || error?.message || "Something Went Wrong"
+    );
+  }
+};
+
 export {
   getAllResumeData,
   deleteThisResume,
   getResumeData,
   updateThisResume,
   createNewResume,
+  createResumeFromUpload,
 };

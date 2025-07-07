@@ -1,0 +1,72 @@
+John Doe
+Software Engineer
+Email: john.doe@email.com
+Phone: (555) 123-4567
+Address: 123 Main St, San Francisco, CA 94102
+
+PROFESSIONAL SUMMARY
+Experienced full-stack software engineer with 5+ years of experience developing scalable web applications. Proficient in JavaScript, React, Node.js, and cloud technologies. Strong problem-solving skills and passion for creating efficient, user-friendly solutions.
+
+WORK EXPERIENCE
+
+Senior Software Engineer
+Tech Innovations Inc. | San Francisco, CA
+January 2021 - Present
+• Led development of microservices architecture serving 1M+ daily users
+• Implemented CI/CD pipelines reducing deployment time by 60%
+• Mentored junior developers and conducted code reviews
+• Technologies: React, Node.js, AWS, Docker, Kubernetes
+
+Software Engineer
+StartupCorp | San Francisco, CA
+June 2019 - December 2020
+• Built responsive web applications using React and Redux
+• Developed RESTful APIs with Node.js and Express
+• Optimized database queries improving performance by 40%
+• Collaborated with cross-functional teams in Agile environment
+
+Junior Developer
+WebSolutions LLC | San Jose, CA
+August 2018 - May 2019
+• Maintained legacy PHP applications and migrated to modern stack
+• Created automated testing suites increasing code coverage to 85%
+• Participated in daily standups and sprint planning meetings
+
+EDUCATION
+
+Bachelor of Science in Computer Science
+University of California, Berkeley | Berkeley, CA
+September 2014 - May 2018
+GPA: 3.7/4.0
+Relevant Coursework: Data Structures, Algorithms, Database Systems, Software Engineering
+
+TECHNICAL SKILLS
+• Programming Languages: JavaScript, Python, Java, PHP, SQL
+• Frontend: React, Vue.js, HTML5, CSS3, TypeScript
+• Backend: Node.js, Express, Django, Spring Boot
+• Databases: PostgreSQL, MongoDB, Redis
+• Cloud & DevOps: AWS, Docker, Kubernetes, Jenkins
+• Tools: Git, JIRA, Slack, VS Code
+
+PROJECTS
+
+E-Commerce Platform
+• Built full-stack e-commerce application with React frontend and Node.js backend
+• Implemented payment processing with Stripe API
+• Deployed on AWS with auto-scaling capabilities
+• Technologies: React, Node.js, PostgreSQL, AWS, Docker
+
+Task Management App
+• Developed collaborative task management application
+• Real-time updates using WebSocket connections
+• User authentication and authorization system
+• Technologies: Vue.js, Express, MongoDB, Socket.io
+
+CERTIFICATIONS
+• AWS Certified Solutions Architect - Associate (2022)
+• Google Cloud Professional Developer (2021)
+
+LANGUAGES
+• English (Native)
+• Spanish (Conversational)
+• Mandarin (Basic)
