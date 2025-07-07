@@ -1,29 +1,5 @@
 {
   "version": 2,
-  "name": "ai-resume-builder-frontend",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ],
-  "env": {
-    "VITE_APP_URL": "@vite_app_url",
-    "VITE_GEMENI_API_KEY": "@vite_gemeni_api_key"
-  },
-  "build": {
-    "env": {
-      "VITE_APP_URL": "@vite_app_url",
-      "VITE_GEMENI_API_KEY": "@vite_gemeni_api_key"
-    }
-  }
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
 }
