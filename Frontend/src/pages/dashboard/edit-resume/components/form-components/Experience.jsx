@@ -108,27 +108,31 @@ function Experience({ resumeInfo, enanbledNext, enanbledPrev }) {
   };
   return (
     <div>
-      <div className="p-5 shadow-lg rounded-lg border-t-primary border-t-4 mt-10">
-        <h2 className="font-bold text-lg">Experience</h2>
-        <p>Add your work experience details first, then use AI to enhance your descriptions</p>
-        <div>
+      <div className="mobile-card border-t-primary border-t-4 mt-6 sm:mt-10">
+        <h2 className="font-bold text-lg sm:text-xl">Experience</h2>
+        <p className="text-sm sm:text-base text-gray-600 mb-6">Add your work experience details first, then use AI to enhance your descriptions</p>
+
+        <div className="space-y-6">
           {experienceList?.map((experience, index) => (
-            <div key={index}>
-              <div className="flex justify-between my-2">
-                <h3 className="font-bold text-lg">Experience {index + 1}</h3>
-                <Button
-                  variant="outline"
-                  className="text-red-500"
-                  onClick={(e) => {
-                    removeExperience(index);
-                  }}
-                >
-                  <Trash2 />
-                </Button>
+            <div key={index} className="border border-gray-200 rounded-lg p-4 sm:p-6 bg-gray-50">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-medium text-gray-900">Experience {index + 1}</h3>
+                {experienceList.length > 1 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 btn-touch"
+                    onClick={(e) => {
+                      removeExperience(index);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
-              <div className="grid grid-cols-2 gap-3 border p-3 my-5 rounded-lg">
+              <div className="mobile-form-grid gap-4">
                 <div>
-                  <label className="text-xs">Position Tittle</label>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">Position Title *</label>
                   <Input
                     type="text"
                     name="title"
@@ -136,10 +140,13 @@ function Experience({ resumeInfo, enanbledNext, enanbledPrev }) {
                     onChange={(e) => {
                       handleChange(e, index);
                     }}
+                    placeholder="e.g., Software Engineer"
+                    className="btn-touch"
+                    required
                   />
                 </div>
                 <div>
-                  <label className="text-xs">Company Name</label>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">Company Name *</label>
                   <Input
                     type="text"
                     name="companyName"
@@ -147,10 +154,13 @@ function Experience({ resumeInfo, enanbledNext, enanbledPrev }) {
                     onChange={(e) => {
                       handleChange(e, index);
                     }}
+                    placeholder="e.g., Google Inc."
+                    className="btn-touch"
+                    required
                   />
                 </div>
                 <div>
-                  <label className="text-xs">City</label>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">City</label>
                   <Input
                     type="text"
                     name="city"
@@ -158,10 +168,12 @@ function Experience({ resumeInfo, enanbledNext, enanbledPrev }) {
                     onChange={(e) => {
                       handleChange(e, index);
                     }}
+                    placeholder="e.g., San Francisco"
+                    className="btn-touch"
                   />
                 </div>
                 <div>
-                  <label className="text-xs">State</label>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">State</label>
                   <Input
                     type="text"
                     name="state"
@@ -169,10 +181,12 @@ function Experience({ resumeInfo, enanbledNext, enanbledPrev }) {
                     onChange={(e) => {
                       handleChange(e, index);
                     }}
+                    placeholder="e.g., CA"
+                    className="btn-touch"
                   />
                 </div>
                 <div>
-                  <label className="text-xs">StartDate</label>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">Start Date *</label>
                   <Input
                     type="date"
                     name="startDate"
@@ -180,10 +194,12 @@ function Experience({ resumeInfo, enanbledNext, enanbledPrev }) {
                     onChange={(e) => {
                       handleChange(e, index);
                     }}
+                    className="btn-touch"
+                    required
                   />
                 </div>
                 <div>
-                  <label className="text-xs">End Date</label>
+                  <label className="text-sm font-medium text-gray-700 block mb-2">End Date</label>
                   <Input
                     type="date"
                     name="endDate"
@@ -191,6 +207,8 @@ function Experience({ resumeInfo, enanbledNext, enanbledPrev }) {
                     onChange={(e) => {
                       handleChange(e, index);
                     }}
+                    className="btn-touch"
+                    placeholder="Leave blank if current"
                   />
                 </div>
                 <div className="col-span-2">
@@ -207,17 +225,19 @@ function Experience({ resumeInfo, enanbledNext, enanbledPrev }) {
             </div>
           ))}
         </div>
-        <div className="flex justify-between py-2">
+        <div className="flex flex-col sm:flex-row sm:justify-between gap-4 mt-6">
           <Button
             onClick={addExperience}
             variant="outline"
-            className="text-primary"
+            className="text-primary btn-touch flex items-center justify-center gap-2"
           >
-            + Add {resumeInfo?.experience?.length > 0 ? "more" : null}{" "}
-            Experience
+            + Add {resumeInfo?.experience?.length > 0 ? "More" : ""} Experience
           </Button>
-          <Button onClick={onSave}>
-            {loading ? <LoaderCircle className=" animate-spin" /> : "Save"}
+          <Button
+            onClick={onSave}
+            className="btn-touch w-full sm:w-auto"
+          >
+            {loading ? <LoaderCircle className="animate-spin" /> : "Save Experience"}
           </Button>
         </div>
       </div>

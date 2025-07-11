@@ -17,6 +17,21 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: true
+  },
+  // Trial system fields
+  trialsUsed: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  trialsLimit: {
+    type: Number,
+    default: 2,
+    min: 0
+  },
+  trialResetDate: {
+    type: Date,
+    default: null // For future expansion - could implement monthly resets
   }
 }, { timestamps: true });
 

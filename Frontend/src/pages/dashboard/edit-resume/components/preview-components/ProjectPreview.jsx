@@ -1,5 +1,11 @@
 import React from "react";
 
+// Utility function to convert markdown bold to HTML
+const convertMarkdownToHTML = (text) => {
+  if (!text) return '';
+  return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+};
+
 function ProjectPreview({ resumeInfo }) {
   return (
     <div className="my-6">
@@ -38,7 +44,7 @@ function ProjectPreview({ resumeInfo }) {
           </h2>
           <div
             className="text-xs my-2"
-            dangerouslySetInnerHTML={{ __html: project?.projectSummary }}
+            dangerouslySetInnerHTML={{ __html: convertMarkdownToHTML(project?.projectSummary) }}
           />
         </div>
       ))}

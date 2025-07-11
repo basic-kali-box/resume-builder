@@ -1,4 +1,4 @@
-import { AIChatSession } from "@/Services/AiModel";
+import { BackendAIChatSession } from "@/Services/BackendAiService";
 import { updateThisResume } from "@/Services/resumeAPI";
 import { toast } from "sonner";
 
@@ -24,7 +24,7 @@ const ENHANCEMENT_PROMPTS = {
   - Maintain the user's personal voice and experiences
   - Format important technical terms, skills, and technologies in **bold** (e.g., **JavaScript**, **React**, **AWS**, **Machine Learning**)
 
-  Return only the enhanced summary text with bold formatting applied to technical terms, no additional formatting or explanations.`,
+  IMPORTANT: Return ONLY the enhanced summary text as plain text with bold formatting applied to technical terms. Do NOT return JSON, arrays, or any other format. Just the enhanced text directly.`,
 
   experience: `Please enhance and improve the following work experience description while preserving the user's original intent and key points:
 
@@ -41,7 +41,7 @@ const ENHANCEMENT_PROMPTS = {
   - Maintain the user's personal experiences and accomplishments
   - Format important technical terms, skills, technologies, and tools in **bold** (e.g., **Python**, **AWS**, **Agile**, **SQL**)
 
-  Return only the enhanced description text with bold formatting applied to technical terms, no additional formatting or explanations.`,
+  IMPORTANT: Return ONLY the enhanced description text as plain text with bold formatting applied to technical terms. Do NOT return JSON, arrays, or any other format. Just the enhanced text directly.`,
 
   education: `Please enhance and improve the following education description while preserving the user's original intent and key points:
 
@@ -59,7 +59,7 @@ const ENHANCEMENT_PROMPTS = {
   - Maintain the user's personal academic experiences
   - Format important technical terms, subjects, and technologies in **bold** (e.g., **Computer Science**, **Machine Learning**, **Data Analysis**)
 
-  Return only the enhanced description text with bold formatting applied to technical terms, no additional formatting or explanations.`,
+  IMPORTANT: Return ONLY the enhanced description text as plain text with bold formatting applied to technical terms. Do NOT return JSON, arrays, or any other format. Just the enhanced text directly.`,
 
   project: `Please enhance and improve the following project description while preserving the user's original intent and key points:
 
@@ -76,30 +76,62 @@ const ENHANCEMENT_PROMPTS = {
   - Maintain the user's personal project experiences and achievements
   - Format important technical terms, frameworks, languages, and tools in **bold** (e.g., **React**, **Node.js**, **MongoDB**, **API**)
 
-  Return only the enhanced description text with bold formatting applied to technical terms, no additional formatting or explanations.`
+  IMPORTANT: Return ONLY the enhanced description text as plain text with bold formatting applied to technical terms. Do NOT return JSON, arrays, or any other format. Just the enhanced text directly.`
 };
 
 /**
  * Helper function to extract text from AI response (handles JSON responses)
  */
 const extractTextFromAIResponse = (responseText) => {
+  if (!responseText || typeof responseText !== 'string') {
+    return '';
+  }
+
+  const cleanedText = responseText.trim();
+
   try {
     // Try to parse as JSON first (in case AI returns JSON format)
-    const parsed = JSON.parse(responseText);
+    const parsed = JSON.parse(cleanedText);
 
-    // Look for common JSON keys that might contain the enhanced text
-    if (parsed.enhancedSummary) return parsed.enhancedSummary;
-    if (parsed.enhancedDescription) return parsed.enhancedDescription;
-    if (parsed.enhanced) return parsed.enhanced;
-    if (parsed.text) return parsed.text;
-    if (parsed.description) return parsed.description;
-    if (parsed.summary) return parsed.summary;
+    // Handle array format (like [{"enhanced_summary": "..."}])
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      const firstItem = parsed[0];
+      const extractedText = firstItem.enhanced_summary ||
+                           firstItem.summary ||
+                           firstItem.enhanced_description ||
+                           firstItem.description ||
+                           firstItem.enhanced_text ||
+                           firstItem.text ||
+                           firstItem.content ||
+                           '';
+
+      console.log("Extracted from JSON array:", extractedText);
+      return extractedText;
+    }
+
+    // Handle object format
+    if (typeof parsed === 'object') {
+      const extractedText = parsed.enhanced_summary ||
+                           parsed.enhancedSummary ||
+                           parsed.summary ||
+                           parsed.enhanced_description ||
+                           parsed.enhancedDescription ||
+                           parsed.description ||
+                           parsed.enhanced_text ||
+                           parsed.text ||
+                           parsed.content ||
+                           '';
+
+      console.log("Extracted from JSON object:", extractedText);
+      return extractedText;
+    }
 
     // If it's an object but no recognized keys, return the original response
-    return responseText;
+    return cleanedText;
   } catch (error) {
     // Not JSON, return as plain text
-    return responseText;
+    console.log("Using plain text response:", cleanedText);
+    return cleanedText;
   }
 };
 
@@ -116,7 +148,7 @@ export const enhanceSummary = async (originalSummary, jobTitle) => {
       .replace("{jobTitle}", jobTitle || "Professional")
       .replace("{originalSummary}", originalSummary);
 
-    const result = await AIChatSession.sendMessage(prompt);
+    const result = await BackendAIChatSession.sendMessage(prompt, 'summary');
     const rawResponse = result.response.text().trim();
     const enhancedSummary = extractTextFromAIResponse(rawResponse);
 
@@ -146,7 +178,7 @@ export const enhanceExperience = async (experienceList) => {
             .replace("{companyName}", experience.companyName || "Company")
             .replace("{originalDescription}", experience.workSummary);
 
-          const result = await AIChatSession.sendMessage(prompt);
+          const result = await BackendAIChatSession.sendMessage(prompt, 'experience');
           const rawResponse = result.response.text().trim();
           const enhancedDescription = extractTextFromAIResponse(rawResponse);
 
@@ -190,7 +222,7 @@ export const enhanceEducation = async (educationList) => {
             .replace("{universityName}", education.universityName || "University")
             .replace("{originalDescription}", education.description);
 
-          const result = await AIChatSession.sendMessage(prompt);
+          const result = await BackendAIChatSession.sendMessage(prompt, 'education');
           const rawResponse = result.response.text().trim();
           const enhancedDescription = extractTextFromAIResponse(rawResponse);
 
@@ -233,7 +265,7 @@ export const enhanceProjects = async (projectsList) => {
             .replace("{techStack}", project.techStack || "Various Technologies")
             .replace("{originalDescription}", project.projectSummary);
 
-          const result = await AIChatSession.sendMessage(prompt);
+          const result = await BackendAIChatSession.sendMessage(prompt, 'project');
           const rawResponse = result.response.text().trim();
           const enhancedDescription = extractTextFromAIResponse(rawResponse);
 

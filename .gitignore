@@ -80,3 +80,14 @@ pids/
 *.pid
 *.seed
 *.pid.lock
+
+# Deployment files with secrets
+Backend/app.yaml
+Backend/public/
+Backend/src/public/
+Frontend/public/assets/
+Frontend/public/index.html
+
+# Built frontend assets (contain bundled API keys)
+**/public/assets/
+**/public/index.html

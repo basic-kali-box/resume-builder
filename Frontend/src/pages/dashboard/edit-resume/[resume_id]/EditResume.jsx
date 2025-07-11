@@ -59,9 +59,9 @@ export function EditResume() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 p-10 gap-10">
+    <div className="mobile-edit-layout mobile-padding py-6 lg:py-10 gap-6 lg:gap-10">
       {isExtractedResume && (
-        <div className="md:col-span-2 mb-6">
+        <div className="xl:col-span-2 mb-6">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0">
@@ -82,8 +82,12 @@ export function EditResume() {
           </div>
         </div>
       )}
-      <ResumeForm />
-      <PreviewPage />
+      <div className="order-1 xl:order-1">
+        <ResumeForm />
+      </div>
+      <div className="order-2 xl:order-2">
+        <PreviewPage />
+      </div>
     </div>
   );
 }

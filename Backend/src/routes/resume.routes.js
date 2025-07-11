@@ -9,13 +9,14 @@ import {
   removeResume,
 } from "../controller/resume.controller.js";
 import { isUserAvailable } from "../middleware/auth.js";
+import { consumeTrialMiddleware } from "../middleware/trial.js";
 import upload from "../middleware/upload.js";
 
 const router = Router();
 
 router.get("/", start);
 router.post("/createResume", isUserAvailable, createResume);
-router.post("/createResumeFromUpload", isUserAvailable, upload.single("resumeFile"), createResumeFromUpload);
+router.post("/createResumeFromUpload", isUserAvailable, upload.single("resumeFile"), consumeTrialMiddleware("AI Resume Extraction"), createResumeFromUpload);
 router.get("/getAllResume", isUserAvailable, getALLResume);
 router.get("/getResume", isUserAvailable, getResume);
 router.put("/updateResume", isUserAvailable, updateResume);

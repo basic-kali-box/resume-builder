@@ -1,8 +1,16 @@
 import axios from "axios";
 import { VITE_APP_URL } from "@/config/config";
 
+// Determine the base URL based on environment
+const getBaseURL = () => {
+  if (import.meta.env.PROD) {
+    return "/api/";
+  }
+  return (VITE_APP_URL || "http://localhost:5001/") + "api/";
+};
+
 const axiosInstance = axios.create({
-  baseURL: VITE_APP_URL + "api/",
+  baseURL: getBaseURL(),
   headers: {
     "Content-Type": "application/json",
   },

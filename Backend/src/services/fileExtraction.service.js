@@ -1,35 +1,7 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import mammoth from "mammoth";
 import fs from "fs";
-
-// Lazy initialization of Gemini AI
-let genAI = null;
-let model = null;
-
-const getGeminiModel = () => {
-  if (!model) {
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error("GEMINI_API_KEY environment variable is not set");
-    }
-
-    console.log("Initializing Gemini AI with API key:", `${process.env.GEMINI_API_KEY.substring(0, 10)}...`);
-    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-    model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-    });
-  }
-  return model;
-};
-
-const generationConfig = {
-  temperature: 0.3,
-  topP: 0.95,
-  topK: 64,
-  maxOutputTokens: 8192,
-  responseMimeType: "application/json",
-};
+import { createHierarchicalChatSession } from "./hierarchicalAI.service.js";
 
 // AI Prompt for resume extraction
 const EXTRACTION_PROMPT = `
@@ -131,9 +103,12 @@ export const extractTextFromPDF = async (filePath) => {
       throw new Error("PDF file is empty");
     }
 
+    // Convert Buffer to Uint8Array for pdfjs-dist compatibility
+    const uint8Array = new Uint8Array(dataBuffer);
+
     // Load PDF document using pdfjs-dist
     const loadingTask = pdfjsLib.getDocument({
-      data: dataBuffer,
+      data: uint8Array,
       verbosity: 0, // Suppress console output
     });
 
@@ -216,56 +191,20 @@ export const extractTextFromDOCX = async (filePath) => {
   }
 };
 
-/**
- * Helper function to implement exponential backoff retry logic
- */
-const retryWithBackoff = async (fn, maxRetries = 3, baseDelay = 1000) => {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await fn();
-    } catch (error) {
-      if (attempt === maxRetries) {
-        throw error;
-      }
 
-      // Check if it's a retryable error (503, 429, network errors)
-      const isRetryable =
-        error.status === 503 ||
-        error.status === 429 ||
-        error.message.includes("network") ||
-        error.message.includes("fetch") ||
-        error.message.includes("overloaded");
-
-      if (!isRetryable) {
-        throw error;
-      }
-
-      const delay = baseDelay * Math.pow(2, attempt - 1) + Math.random() * 1000;
-      console.log(`Attempt ${attempt} failed, retrying in ${Math.round(delay)}ms...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
-  }
-};
 
 /**
- * Extract structured data from resume text using AI
+ * Extract structured data from resume text using AI with hierarchical fallback
  */
 export const extractResumeDataWithAI = async (resumeText) => {
   try {
     const prompt = EXTRACTION_PROMPT.replace("{resumeText}", resumeText);
 
-    const geminiModel = getGeminiModel();
+    console.log("🚀 Starting AI resume extraction with hierarchical fallback system...");
 
-    console.log("Sending resume text to AI for extraction...");
-
-    // Use retry logic for API calls
-    const result = await retryWithBackoff(async () => {
-      const chatSession = geminiModel.startChat({
-        generationConfig,
-        history: [],
-      });
-      return await chatSession.sendMessage(prompt);
-    }, 3, 2000); // 3 retries, starting with 2 second delay
+    // Use hierarchical AI service with built-in retry and fallback logic
+    const chatSession = createHierarchicalChatSession();
+    const result = await chatSession.sendMessage(prompt);
 
     const responseText = result.response.text();
 

@@ -70,68 +70,74 @@ function PersonalDetails({ resumeInfo, enanbledNext }) {
   };
 
   return (
-    <div className="p-5 shadow-lg rounded-lg border-t-primary border-t-4 mt-10">
-      <h2 className="font-bold text-lg">Personal Detail</h2>
-      <p>Get Started with the basic information</p>
+    <div className="mobile-card border-t-primary border-t-4 mt-6 sm:mt-10">
+      <h2 className="font-bold text-lg sm:text-xl">Personal Detail</h2>
+      <p className="text-sm sm:text-base text-gray-600 mb-4">Get Started with the basic information</p>
 
       <form onSubmit={onSave}>
-        <div className="grid grid-cols-2 mt-5 gap-3">
+        <div className="mobile-form-grid mt-4 sm:mt-5 gap-4">
           <div>
-            <label className="text-sm">First Name</label>
+            <label className="text-sm font-medium text-gray-700 block mb-2">First Name</label>
             <Input
               name="firstName"
               defaultValue={resumeInfo?.firstName}
               required
               onChange={handleInputChange}
+              className="btn-touch"
             />
           </div>
           <div>
-            <label className="text-sm">Last Name</label>
+            <label className="text-sm font-medium text-gray-700 block mb-2">Last Name</label>
             <Input
               name="lastName"
               required
               onChange={handleInputChange}
               defaultValue={resumeInfo?.lastName}
+              className="btn-touch"
             />
           </div>
-          <div className="col-span-2">
-            <label className="text-sm">Job Title</label>
+          <div className="sm:col-span-2">
+            <label className="text-sm font-medium text-gray-700 block mb-2">Job Title</label>
             <Input
               name="jobTitle"
               defaultValue={resumeInfo?.jobTitle}
               onChange={handleInputChange}
+              className="btn-touch"
             />
           </div>
-          <div className="col-span-2">
-            <label className="text-sm">Address</label>
+          <div className="sm:col-span-2">
+            <label className="text-sm font-medium text-gray-700 block mb-2">Address</label>
             <Input
               name="address"
               required
               defaultValue={resumeInfo?.address}
               onChange={handleInputChange}
+              className="btn-touch"
             />
           </div>
           <div>
-            <label className="text-sm">Phone</label>
+            <label className="text-sm font-medium text-gray-700 block mb-2">Phone</label>
             <Input
               name="phone"
               required
               defaultValue={resumeInfo?.phone}
               onChange={handleInputChange}
+              className="btn-touch"
             />
           </div>
           <div>
-            <label className="text-sm">Email</label>
+            <label className="text-sm font-medium text-gray-700 block mb-2">Email</label>
             <Input
               name="email"
               required
               defaultValue={resumeInfo?.email}
               onChange={handleInputChange}
+              className="btn-touch"
             />
           </div>
         </div>
-        <div className="mt-3 flex justify-end">
-          <Button type="submit" disabled={loading}>
+        <div className="mt-6 flex justify-end">
+          <Button type="submit" disabled={loading} className="btn-touch w-full sm:w-auto">
             {loading ? <LoaderCircle className="animate-spin" /> : "Save"}
           </Button>
         </div>

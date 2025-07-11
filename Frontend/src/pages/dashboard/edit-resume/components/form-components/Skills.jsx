@@ -108,26 +108,27 @@ function Skills({ resumeInfo, enanbledNext }) {
     }
   };
   return (
-    <div className="p-5 shadow-lg rounded-lg border-t-primary border-t-4 mt-10">
-      <h2 className="font-bold text-lg">Skills</h2>
-      <p>Add Your top professional key skills (Maximum 3 skills)</p>
+    <div className="mobile-card border-t-primary border-t-4 mt-6 sm:mt-10">
+      <h2 className="font-bold text-lg sm:text-xl">Skills</h2>
+      <p className="text-sm sm:text-base text-gray-600 mb-4">Add Your top professional key skills (Maximum 3 skills)</p>
 
-      <div>
+      <div className="space-y-4">
         {skillsList.map((item, index) => (
           <div
             key={index}
-            className="flex justify-between mb-2 border rounded-lg p-3 "
+            className="flex flex-col sm:flex-row sm:justify-between gap-4 border rounded-lg p-4"
           >
-            <div>
-              <label className="text-xs">Name</label>
+            <div className="flex-1">
+              <label className="text-sm font-medium text-gray-700 block mb-2">Skill Name</label>
               <Input
-                className="w-full"
+                className="w-full btn-touch"
                 defaultValue={item.name}
                 onChange={(e) => handleChange(index, "name", e.target.value)}
+                placeholder="e.g., JavaScript, Project Management"
               />
             </div>
-            <div className="flex flex-col items-center gap-2">
-              <label className="text-xs">Skill Level</label>
+            <div className="flex flex-col items-center gap-2 sm:min-w-[120px]">
+              <label className="text-sm font-medium text-gray-700">Skill Level</label>
               <StarRating
                 rating={item.rating}
                 onRatingChange={(v) => handleChange(index, "rating", v)}
@@ -136,34 +137,37 @@ function Skills({ resumeInfo, enanbledNext }) {
           </div>
         ))}
       </div>
-      <div className="flex justify-between">
-        <div className="flex gap-2 flex-col">
-          <div className="flex gap-2">
+
+      <div className="flex flex-col sm:flex-row sm:justify-between gap-4 mt-6">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={AddNewSkills}
-              className="text-primary"
+              className="text-primary btn-touch"
               disabled={skillsList.length >= 3}
             >
-              {" "}
               + Add More Skill
             </Button>
             <Button
               variant="outline"
               onClick={RemoveSkills}
-              className="text-primary"
+              className="text-primary btn-touch"
               disabled={skillsList.length <= 1}
             >
-              {" "}
-              - Remove
+              - Remove Skill
             </Button>
           </div>
           {skillsList.length >= 3 && (
             <p className="text-xs text-gray-500">Maximum 3 skills reached</p>
           )}
         </div>
-        <Button disabled={loading} onClick={onSave}>
-          {loading ? <LoaderCircle className="animate-spin" /> : "Save"}
+        <Button
+          disabled={loading}
+          onClick={onSave}
+          className="btn-touch w-full sm:w-auto"
+        >
+          {loading ? <LoaderCircle className="animate-spin" /> : "Save Skills"}
         </Button>
       </div>
     </div>

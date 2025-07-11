@@ -17,7 +17,7 @@ function EducationalPreview({ resumeInfo }) {
               color: resumeInfo?.themeColor,
             }}
           >
-            Formations
+            Education
           </h2>
           <hr
             style={{

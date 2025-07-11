@@ -90,48 +90,47 @@ function AuthPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="flex flex-col items-center justify-center py-12 mobile-padding bg-gradient-to-br from-slate-50 to-blue-50">
       <motion.div
-        className="relative w-full max-w-md p-8 bg-white rounded-xl shadow-xl border border-gray-100"
+        className="relative w-full max-w-md mobile-card bg-white border border-gray-100"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-lg">AR</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">AI Resume Builder</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">AI Resume Builder</h1>
           <p className="text-gray-600 text-sm mt-1">Create your professional resume</p>
         </div>
         <div className="flex justify-around mb-6 border-b border-gray-200">
           <button
             onClick={() => setIsSignUp(false)}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-t-lg ${
+            className={`flex items-center gap-2 px-4 sm:px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-t-lg btn-touch ${
               !isSignUp
                 ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-sm"
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
             <FaSignInAlt />
-            Sign In
+            <span className="hidden sm:inline">Sign In</span>
           </button>
           <button
             onClick={() => setIsSignUp(true)}
-            className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-t-lg ${
+            className={`flex items-center gap-2 px-4 sm:px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-t-lg btn-touch ${
               isSignUp
                 ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-sm"
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
             <FaUserPlus />
-            Sign Up
+            <span className="hidden sm:inline">Sign Up</span>
           </button>
         </div>
 
-        <div className="relative overflow-hidden h-80">
-          {" "}
+        <div className="relative overflow-hidden min-h-[320px] sm:h-80">
           {/* Added height to ensure content is visible */}
           <motion.div
             className={`absolute inset-0 transition-transform duration-500 ${
@@ -141,38 +140,38 @@ function AuthPage() {
             animate={{ opacity: isSignUp ? 1 : 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center">Sign Up</h2>
             <form onSubmit={handleSignUpSubmit} className="space-y-4">
-              <div className="flex items-center border border-gray-200 rounded-lg p-3 gap-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200">
-                <FaUser className="text-gray-400" />
+              <div className="flex items-center border border-gray-200 rounded-lg p-3 gap-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200 btn-touch">
+                <FaUser className="text-gray-400 flex-shrink-0" />
                 <input
                   type="text"
                   name="fullname"
                   placeholder="Full Name"
                   required
-                  className="outline-none w-full text-gray-900 placeholder-gray-500"
+                  className="outline-none w-full text-gray-900 placeholder-gray-500 text-base"
                 />
               </div>
-              <div className="flex items-center border border-gray-200 rounded-lg p-3 gap-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200">
-                <FaUser className="text-gray-400" />
+              <div className="flex items-center border border-gray-200 rounded-lg p-3 gap-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200 btn-touch">
+                <FaUser className="text-gray-400 flex-shrink-0" />
                 <input
                   type="email"
                   name="email"
                   placeholder="Email"
                   required
-                  className="outline-none w-full text-gray-900 placeholder-gray-500"
+                  className="outline-none w-full text-gray-900 placeholder-gray-500 text-base"
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}
                 />
               </div>
-              <div className="flex items-center border rounded-md border-gray-300 p-2 gap-3">
-                <FaLock className="text-gray-400 mr-2" />
+              <div className="flex items-center border rounded-lg border-gray-200 p-3 gap-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200 btn-touch">
+                <FaLock className="text-gray-400 flex-shrink-0" />
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
                   placeholder="Password"
                   required
-                  className="outline-none w-full"
+                  className="outline-none w-full text-base"
                   onChange={(e) => setPassword(e.target.value)}
                   value={password}
                 />

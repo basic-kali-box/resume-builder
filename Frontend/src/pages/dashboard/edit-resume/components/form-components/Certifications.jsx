@@ -88,76 +88,110 @@ function Certifications({ resumeInfo, enabledNext }) {
   };
 
   return (
-    <div className="p-5 shadow-lg rounded-lg border-t-primary border-t-4 mt-10">
-      <h2 className="font-bold text-lg">Certifications</h2>
-      <p>Add your professional certifications and credentials</p>
-      <div>
+    <div className="mobile-card border-t-primary border-t-4 mt-6 sm:mt-10">
+      <h2 className="font-bold text-lg sm:text-xl">Certifications</h2>
+      <p className="text-sm sm:text-base text-gray-600 mb-6">Add your professional certifications and credentials</p>
+
+      <div className="space-y-6">
         {certificationsList.map((item, index) => (
-          <div key={index}>
-            <div className="grid grid-cols-2 gap-3 border p-3 my-5 rounded-lg">
-              <div>
-                <label className="text-xs">Certification Name</label>
+          <div key={index} className="border border-gray-200 rounded-lg p-4 sm:p-6 bg-gray-50">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-medium text-gray-900">Certification {index + 1}</h3>
+              {certificationsList.length > 1 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    const newList = certificationsList.filter((_, i) => i !== index);
+                    setCertificationsList(newList);
+                  }}
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50 btn-touch"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+
+            <div className="mobile-form-grid gap-4">
+              <div className="sm:col-span-2">
+                <label className="text-sm font-medium text-gray-700 block mb-2">Certification Name *</label>
                 <Input
                   name="name"
                   onChange={(event) => handleChange(index, event)}
                   value={item?.name}
                   placeholder="e.g., AWS Certified Solutions Architect"
+                  className="btn-touch"
+                  required
                 />
               </div>
-              <div>
-                <label className="text-xs">Issuing Organization</label>
+
+              <div className="sm:col-span-2">
+                <label className="text-sm font-medium text-gray-700 block mb-2">Issuing Organization *</label>
                 <Input
                   name="issuingOrganization"
                   onChange={(event) => handleChange(index, event)}
                   value={item?.issuingOrganization}
                   placeholder="e.g., Amazon Web Services"
+                  className="btn-touch"
+                  required
                 />
               </div>
+
               <div>
-                <label className="text-xs">Issue Date</label>
+                <label className="text-sm font-medium text-gray-700 block mb-2">Issue Date *</label>
                 <Input
                   name="issueDate"
                   type="month"
                   onChange={(event) => handleChange(index, event)}
                   value={item?.issueDate}
+                  className="btn-touch"
+                  required
                 />
               </div>
+
               <div>
-                <label className="text-xs">Expiration Date (Optional)</label>
+                <label className="text-sm font-medium text-gray-700 block mb-2">Expiration Date</label>
                 <Input
                   name="expirationDate"
                   type="month"
                   onChange={(event) => handleChange(index, event)}
                   value={item?.expirationDate}
                   placeholder="Leave blank if no expiration"
+                  className="btn-touch"
                 />
+                <p className="text-xs text-gray-500 mt-1">Optional - leave blank if certification doesn't expire</p>
               </div>
             </div>
           </div>
         ))}
       </div>
-      <div className="flex justify-between">
-        <div className="flex gap-2">
+
+      <div className="flex flex-col sm:flex-row sm:justify-between gap-4 mt-6">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button
             variant="outline"
             onClick={AddNewCertification}
-            className="text-primary flex items-center gap-2"
+            className="text-primary flex items-center justify-center gap-2 btn-touch"
           >
             <Plus className="h-4 w-4" />
-            Add More Certification
+            Add Certification
           </Button>
           <Button
             variant="outline"
             onClick={RemoveCertification}
-            className="text-red-500 hover:text-red-700 hover:bg-red-50 flex items-center gap-2"
+            className="text-red-500 hover:text-red-700 hover:bg-red-50 flex items-center justify-center gap-2 btn-touch"
             disabled={certificationsList.length <= 1}
           >
             <Trash2 className="h-4 w-4" />
-            Remove
+            Remove Last
           </Button>
         </div>
-        <Button disabled={loading} onClick={onSave}>
-          {loading ? <LoaderCircle className="animate-spin" /> : "Save"}
+        <Button
+          disabled={loading}
+          onClick={onSave}
+          className="btn-touch w-full sm:w-auto"
+        >
+          {loading ? <LoaderCircle className="animate-spin" /> : "Save Certifications"}
         </Button>
       </div>
     </div>

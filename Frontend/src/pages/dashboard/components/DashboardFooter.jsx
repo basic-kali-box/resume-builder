@@ -1,8 +1,10 @@
 import React from "react";
-import { FaGithub, FaTwitter, FaLinkedin, FaHeart, FaShieldAlt, FaQuestionCircle } from "react-icons/fa";
+import { FaCrown, FaTwitter, FaLinkedin, FaHeart, FaShieldAlt, FaQuestionCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 function DashboardFooter() {
   const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
 
   return (
     <footer className="bg-gray-50 border-t border-gray-200 mt-auto">
@@ -20,31 +22,32 @@ function DashboardFooter() {
               Create professional, ATS-friendly resumes with the power of AI. 
               Build your career with confidence using our intelligent resume builder.
             </p>
-            <div className="flex space-x-4">
-              <a 
-                href="https://github.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-4">
+              <button
+                onClick={() => navigate('/pricing')}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium text-sm"
               >
-                <FaGithub className="h-5 w-5" />
-              </a>
-              <a 
-                href="https://twitter.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-400 transition-colors"
-              >
-                <FaTwitter className="h-5 w-5" />
-              </a>
-              <a 
-                href="https://linkedin.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-600 transition-colors"
-              >
-                <FaLinkedin className="h-5 w-5" />
-              </a>
+                <FaCrown className="h-4 w-4" />
+                Start Premium
+              </button>
+              <div className="flex space-x-4">
+                <a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-blue-400 transition-colors"
+                >
+                  <FaTwitter className="h-5 w-5" />
+                </a>
+                <a
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-blue-600 transition-colors"
+                >
+                  <FaLinkedin className="h-5 w-5" />
+                </a>
+              </div>
             </div>
           </div>
 

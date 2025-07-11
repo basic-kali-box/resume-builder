@@ -1,8 +1,16 @@
 import axios from "axios";
-import { API_KEY } from "@/config/config";
+import { API_KEY, VITE_APP_URL } from "@/config/config";
+
+// Determine the base URL based on environment
+const getBaseURL = () => {
+  if (import.meta.env.PROD) {
+    return "/api/";
+  }
+  return (import.meta.env.VITE_BASE_URL || VITE_APP_URL || "http://localhost:5001/") + "api/";
+};
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL + "api/",
+  baseURL: getBaseURL(),
   headers: {
     "Content-Type": "application/json",
     Authorization: `Bearer ${API_KEY}`,

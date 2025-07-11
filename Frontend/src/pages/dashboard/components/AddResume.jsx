@@ -10,10 +10,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createNewResume } from "@/Services/resumeAPI";
+import { createNewResume, createResumeFromUpload } from "@/Services/resumeAPI";
 import { autoEnhanceResumeData } from "@/services/autoEnhancementService";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useTrial } from "@/context/TrialContext";
+import { TrialBadge } from "@/components/custom/TrialCounter";
 
 function AddResume() {
   const [isDialogOpen, setOpenDialog] = useState(false);
@@ -28,6 +30,9 @@ function AddResume() {
   const [enhancementStep, setEnhancementStep] = useState("");
   const fileInputRef = useRef(null);
   const Navigate = useNavigate();
+
+  // Trial context
+  const { canUseAI, handleTrialExhaustion } = useTrial();
 
   const createResume = async () => {
     setLoading(true);
@@ -86,6 +91,12 @@ function AddResume() {
   };
 
   const uploadAndCreateResume = async () => {
+    // Check trial availability first for AI extraction
+    if (!canUseAI()) {
+      handleTrialExhaustion();
+      return;
+    }
+
     if (!selectedFile) {
       toast.error("Please select a file to upload");
       return;
@@ -115,24 +126,10 @@ function AddResume() {
         });
       }, 200);
 
-      const response = await fetch(`${import.meta.env.VITE_APP_URL}api/resumes/createResumeFromUpload`, {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
+      const result = await createResumeFromUpload(formData);
 
       clearInterval(progressInterval);
       setUploadProgress(100);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-
-        // Pass through the specific error message from the backend
-        // This preserves detailed error messages like PDF formatting issues
-        throw new Error(errorData.message || "Upload failed");
-      }
-
-      const result = await response.json();
       console.log("Upload and extraction result:", result);
 
       // Check if extraction was successful and has content to enhance
@@ -175,14 +172,14 @@ function AddResume() {
       setOpenDialog(false);
       Navigate(`/dashboard/edit-resume/${extractedData._id}`);
 
-    } catch (error) {
-      console.error("Error uploading resume:", error);
+    } catch (uploadError) {
+      console.error("Error uploading resume:", uploadError);
 
       // Check if it's an AI service issue
-      if (error.message.includes("AI resume processing is temporarily unavailable") ||
-          error.message.includes("Resume processing is currently unavailable") ||
-          error.message.includes("AI service is currently experiencing")) {
-        toast.error(error.message, {
+      if (uploadError.message.includes("AI resume processing is temporarily unavailable") ||
+          uploadError.message.includes("Resume processing is currently unavailable") ||
+          uploadError.message.includes("AI service is currently experiencing")) {
+        toast.error(uploadError.message, {
           duration: 6000,
           action: {
             label: "Create Manually",
@@ -196,17 +193,17 @@ function AddResume() {
           }
         });
       } else {
-        toast.error(error.message || "Failed to upload and process resume");
+        toast.error(uploadError.message || "Failed to upload and process resume");
       }
+
     } finally {
       setUploadLoading(false);
       setUploadProgress(0);
-      if (!error?.message?.includes("AI")) {
-        setSelectedFile(null);
-        setResumetitle("");
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
+      // Always reset form on completion (success or error)
+      setSelectedFile(null);
+      setResumetitle("");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
     }
   };
@@ -226,58 +223,96 @@ function AddResume() {
   return (
     <>
       <div
-        className="p-6 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 bg-gray-50 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 cursor-pointer group"
+        className="dashboard-card-compact border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 hover:from-blue-50 hover:to-purple-50 hover:border-blue-400 transition-all duration-300 cursor-pointer group text-center"
         onClick={() => setOpenDialog(true)}
         data-create-resume
       >
-        <CopyPlus className="text-3xl text-gray-400 group-hover:text-blue-500 transition-colors duration-300 mb-3" />
-        <p className="text-sm font-medium text-gray-600 group-hover:text-blue-600 transition-colors duration-300">
-          Create New Resume
-        </p>
+        <div className="flex flex-col items-center justify-center py-4">
+          <div className="icon-container-lg bg-gradient-to-br from-blue-100 to-purple-100 text-blue-600 group-hover:scale-110 transition-transform duration-300 mb-4">
+            <CopyPlus className="w-8 h-8" />
+          </div>
+          <h4 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-300 mb-1">
+            Create New Resume
+          </h4>
+          <p className="text-sm text-gray-500 group-hover:text-blue-500 transition-colors duration-300">
+            Start building your career story
+          </p>
+        </div>
       </div>
       <Dialog open={isDialogOpen} onOpenChange={(open) => {
         setOpenDialog(open);
         if (!open) resetDialog();
       }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Create a New Resume</DialogTitle>
-            <DialogDescription>
-              Choose how you'd like to create your resume
+        <DialogContent className="max-w-lg mx-4 sm:mx-auto">
+          <DialogHeader className="text-center">
+            <div className="icon-container-lg bg-gradient-to-br from-blue-100 to-purple-100 text-blue-600 mx-auto mb-4">
+              <CopyPlus className="w-8 h-8" />
+            </div>
+            <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Create a New Resume
+            </DialogTitle>
+            <DialogDescription className="text-sm sm:text-base text-gray-600 mt-2">
+              Choose how you'd like to create your professional resume
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* Creation Mode Selection */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
                 onClick={() => setCreationMode("blank")}
-                className={`p-4 border-2 rounded-lg transition-all ${
+                className={`dashboard-card-compact border-2 transition-all duration-300 group ${
                   creationMode === "blank"
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
+                    : "border-gray-200 hover:border-blue-300 hover:bg-blue-50"
                 }`}
               >
-                <FileText className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                <p className="text-sm font-medium">Create Manually</p>
+                <div className="text-center py-2">
+                  <div className={`icon-container mx-auto mb-3 transition-all duration-300 ${
+                    creationMode === "blank"
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-gray-100 text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-600"
+                  }`}>
+                    <FileText className="h-6 w-6" />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800">Create Manually</p>
+                  <p className="text-xs text-gray-500 mt-1">Start from scratch</p>
+                </div>
               </button>
 
               <button
                 onClick={() => setCreationMode("upload")}
-                className={`p-4 border-2 rounded-lg transition-all ${
+                className={`dashboard-card-compact border-2 transition-all duration-300 group ${
                   creationMode === "upload"
-                    ? "border-purple-500 bg-purple-50"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-purple-500 bg-purple-50 ring-2 ring-purple-200"
+                    : "border-gray-200 hover:border-purple-300 hover:bg-purple-50"
                 }`}
               >
-                <Upload className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-                <p className="text-sm font-medium">Upload & Extract</p>
+                <div className="text-center py-2">
+                  <div className={`icon-container mx-auto mb-3 transition-all duration-300 ${
+                    creationMode === "upload"
+                      ? "bg-purple-100 text-purple-600"
+                      : "bg-gray-100 text-gray-600 group-hover:bg-purple-100 group-hover:text-purple-600"
+                  }`}>
+                    <Upload className="h-6 w-6" />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800">Upload & Extract</p>
+                  <p className="text-xs text-gray-500 mt-1">AI-powered extraction</p>
+                  <div className="flex items-center justify-center mt-2">
+                    <TrialBadge />
+                  </div>
+                </div>
               </button>
             </div>
 
             {/* Resume Title Input */}
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                <div className="icon-container-sm bg-gray-100 text-gray-600">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a.997.997 0 01-.707.293H7a4 4 0 01-4-4V7a4 4 0 014-4z" />
+                  </svg>
+                </div>
                 Resume Title
               </label>
               <Input
@@ -285,7 +320,7 @@ function AddResume() {
                 placeholder="Ex: Backend Developer Resume"
                 value={resumetitle}
                 onChange={(e) => setResumetitle(e.target.value.trimStart())}
-                className="w-full"
+                className="w-full h-12 px-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
               />
             </div>
 
@@ -423,28 +458,31 @@ function AddResume() {
                   )}
                 </Button>
               ) : (
-                <Button
-                  onClick={uploadAndCreateResume}
-                  disabled={!resumetitle.trim() || !selectedFile || uploadLoading || enhancementLoading}
-                  className="bg-purple-600 hover:bg-purple-700"
-                >
-                  {uploadLoading ? (
-                    <>
-                      <Loader className="h-4 w-4 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : enhancementLoading ? (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2 animate-pulse" />
-                      Enhancing...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Extract with AI
-                    </>
-                  )}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={uploadAndCreateResume}
+                    disabled={!resumetitle.trim() || !selectedFile || uploadLoading || enhancementLoading || !canUseAI()}
+                    className="bg-purple-600 hover:bg-purple-700"
+                  >
+                    {uploadLoading ? (
+                      <>
+                        <Loader className="h-4 w-4 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : enhancementLoading ? (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2 animate-pulse" />
+                        Enhancing...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Extract with AI
+                      </>
+                    )}
+                  </Button>
+                  <TrialBadge />
+                </div>
               )}
             </div>
           </div>

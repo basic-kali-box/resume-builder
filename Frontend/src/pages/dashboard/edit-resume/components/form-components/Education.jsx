@@ -8,7 +8,7 @@ import { addResumeData } from "@/features/resume/resumeFeatures";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { updateThisResume } from "@/Services/resumeAPI";
-import { AIChatSession } from "@/Services/AiModel";
+import { BackendAIChatSession } from "@/Services/BackendAiService";
 
 const PROMPT = `Please enhance and improve the following education description while preserving the user's original intent and key points:
 
@@ -139,7 +139,7 @@ function Education({ resumeInfo, enanbledNext }) {
 
     try {
       console.log("Education AI Prompt:", prompt);
-      const result = await AIChatSession.sendMessage(prompt);
+      const result = await BackendAIChatSession.sendMessage(prompt, 'education');
       const responseText = result.response.text();
       console.log("Raw AI Response:", responseText);
 
@@ -197,54 +197,79 @@ function Education({ resumeInfo, enanbledNext }) {
   };
 
   return (
-    <div className="p-5 shadow-lg rounded-lg border-t-primary border-t-4 mt-10">
-      <h2 className="font-bold text-lg">Formations</h2>
-      <p>Add your education details first, then use AI to enhance your descriptions</p>
+    <div className="mobile-card border-t-primary border-t-4 mt-6 sm:mt-10">
+      <h2 className="font-bold text-lg sm:text-xl">Education</h2>
+      <p className="text-sm sm:text-base text-gray-600 mb-6">Add your education details first, then use AI to enhance your descriptions</p>
 
-      <div>
+      <div className="space-y-6">
         {educationalList.map((item, index) => (
-          <div key={index}>
-            <div className="grid grid-cols-2 gap-3 border p-3 my-5 rounded-lg">
-              <div className="col-span-2">
-                <label>University Name</label>
+          <div key={index} className="border border-gray-200 rounded-lg p-4 sm:p-6 bg-gray-50">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-medium text-gray-900">Education {index + 1}</h3>
+              {educationalList.length > 1 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => RemoveEducation(index)}
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50 btn-touch"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            <div className="mobile-form-grid gap-4">
+              <div className="sm:col-span-2">
+                <label className="text-sm font-medium text-gray-700 block mb-2">University Name *</label>
                 <Input
                   name="universityName"
                   onChange={(e) => handleChange(e, index)}
                   defaultValue={item?.universityName}
+                  placeholder="e.g., Stanford University"
+                  className="btn-touch"
+                  required
                 />
               </div>
               <div>
-                <label>Degree</label>
+                <label className="text-sm font-medium text-gray-700 block mb-2">Degree *</label>
                 <Input
                   name="degree"
                   onChange={(e) => handleChange(e, index)}
                   defaultValue={item?.degree}
+                  placeholder="e.g., Bachelor of Science"
+                  className="btn-touch"
+                  required
                 />
               </div>
               <div>
-                <label>Major</label>
+                <label className="text-sm font-medium text-gray-700 block mb-2">Major</label>
                 <Input
                   name="major"
                   onChange={(e) => handleChange(e, index)}
                   defaultValue={item?.major}
+                  placeholder="e.g., Computer Science"
+                  className="btn-touch"
                 />
               </div>
               <div>
-                <label>Start Date</label>
+                <label className="text-sm font-medium text-gray-700 block mb-2">Start Date *</label>
                 <Input
                   type="date"
                   name="startDate"
                   onChange={(e) => handleChange(e, index)}
                   defaultValue={item?.startDate}
+                  className="btn-touch"
+                  required
                 />
               </div>
               <div>
-                <label>End Date</label>
+                <label className="text-sm font-medium text-gray-700 block mb-2">End Date</label>
                 <Input
                   type="date"
                   name="endDate"
                   onChange={(e) => handleChange(e, index)}
                   defaultValue={item?.endDate}
+                  className="btn-touch"
+                  placeholder="Leave blank if current"
                 />
               </div>
               <div className="col-span-2">

@@ -12,10 +12,12 @@ import {
   Separator,
   Toolbar,
 } from "react-simple-wysiwyg";
-import { AIChatSession } from "@/Services/AiModel";
+import { BackendAIChatSession } from "@/Services/BackendAiService";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { Sparkles, LoaderCircle } from "lucide-react";
+import { useTrial } from "@/context/TrialContext";
+import { TrialBadge } from "./TrialCounter";
 import "./RichTextEditor.css";
 
 const PROMPT = `Please enhance and improve the following work experience description while preserving the user's original intent and specific achievements:
@@ -50,6 +52,9 @@ function RichTextEditor({ onRichTextEditorChange, index, resumeInfo, defaultValu
   );
   const [loading, setLoading] = useState(false);
 
+  // Trial context
+  const { canUseAI, handleTrialExhaustion, updateTrialStatusFromResponse } = useTrial();
+
   // Check if work summary has content to enable/disable AI button
   const hasWorkSummaryContent = value && value.trim().length > 0;
 
@@ -58,6 +63,12 @@ function RichTextEditor({ onRichTextEditorChange, index, resumeInfo, defaultValu
   }, [value]);
 
   const GenerateSummaryFromAI = async () => {
+    // Check trial availability first
+    if (!canUseAI()) {
+      handleTrialExhaustion();
+      return;
+    }
+
     // Double-check that user has entered work summary content
     if (!hasWorkSummaryContent) {
       toast("Please write your own work experience description first before using AI enhancement", "error");
@@ -84,9 +95,14 @@ function RichTextEditor({ onRichTextEditorChange, index, resumeInfo, defaultValu
                         .replace("{major}", major);
 
     try {
-      const result = await AIChatSession.sendMessage(prompt);
+      const result = await BackendAIChatSession.sendMessage(prompt, 'experience');
       const responseText = result.response.text();
       console.log("Raw AI Response:", responseText);
+
+      // Update trial status if available
+      if (result.trialStatus) {
+        updateTrialStatusFromResponse({ trialStatus: result.trialStatus });
+      }
 
       // Parse the JSON response
       let parsedResponse;
@@ -159,25 +175,28 @@ function RichTextEditor({ onRichTextEditorChange, index, resumeInfo, defaultValu
           </p>
         </div>
         {hasWorkSummaryContent ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={GenerateSummaryFromAI}
-            disabled={loading}
-            className="flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 shadow-sm"
-          >
-            {loading ? (
-              <>
-                <LoaderCircle className="h-4 w-4 animate-spin" />
-                <span className="text-sm font-medium">Enhancing...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4" />
-                <span className="text-sm font-medium">Enhance with AI</span>
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={GenerateSummaryFromAI}
+              disabled={loading || !canUseAI()}
+              className="flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 shadow-sm"
+            >
+              {loading ? (
+                <>
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                  <span className="text-sm font-medium">Enhancing...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  <span className="text-sm font-medium">Enhance with AI</span>
+                </>
+              )}
+            </Button>
+            <TrialBadge />
+          </div>
         ) : (
           <div className="text-xs text-gray-400 italic max-w-48 text-right">
             Write your experience first to enable AI enhancement

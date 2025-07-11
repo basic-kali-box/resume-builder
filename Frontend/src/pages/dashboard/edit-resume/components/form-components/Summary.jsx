@@ -1,13 +1,24 @@
 import React, { useState } from "react";
-import { Sparkles, LoaderCircle } from "lucide-react";
+import { Sparkles, LoaderCircle, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { ValidatedTextarea } from "@/components/ui/enhanced-form";
 import { useDispatch } from "react-redux";
 import { addResumeData } from "@/features/resume/resumeFeatures";
 import { useParams } from "react-router-dom";
-import { toast } from "sonner";
-import { AIChatSession } from "@/Services/AiModel";
+import { BackendAIChatSession } from "@/Services/BackendAiService";
 import { updateThisResume } from "@/Services/resumeAPI";
+import { useTrial } from "@/context/TrialContext";
+import { TrialBadge } from "@/components/custom/TrialCounter";
+import { TrialWarningPopup } from "@/components/custom/TrialExhaustedModal";
+import { useTrialWarning } from "@/hooks/useTrialWarning";
+import { AILoadingIndicator } from "@/components/ui/loading-states";
+import { enhancedToast, aiToast } from "@/components/ui/enhanced-toast";
+
+// Utility function to convert markdown bold to HTML
+const convertMarkdownToHTML = (text) => {
+  if (!text) return '';
+  return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+};
 
 const prompt =
   `Job Title: {jobTitle}. Generate exactly 3 professional summaries for this job title at different experience levels (Entry Level, Mid Level, Senior Level). Format important technical terms, skills, and technologies in **bold** (e.g., **JavaScript**, **React**, **AWS**, **Machine Learning**). Return ONLY a valid JSON array with this exact format:
@@ -23,6 +34,10 @@ function Summary({ resumeInfo, enanbledNext, enanbledPrev }) {
   const [summary, setSummary] = useState(resumeInfo?.summary || ""); // Declare the undeclared variable using useState
   const [aiGeneratedSummeryList, setAiGenerateSummeryList] = useState(null); // Declare the undeclared variable using useState
   const { resume_id } = useParams();
+
+  // Trial context with new popup system
+  const { updateTrialStatusFromResponse } = useTrial();
+  const { isWarningOpen, checkTrialsAndWarn, closeWarning } = useTrialWarning();
 
   // Check if summary has content to enable/disable AI button
   const hasSummaryContent = summary && summary.trim().length > 0;
@@ -80,24 +95,38 @@ function Summary({ resumeInfo, enanbledNext, enanbledPrev }) {
   };
 
   const GenerateSummeryFromAI = async () => {
+    // Check trial availability with new popup system
+    if (!checkTrialsAndWarn()) {
+      return; // checkTrialsAndWarn handles showing the popup
+    }
+
     // Double-check that user has entered summary content
     if (!hasSummaryContent) {
-      toast("Please write your own summary first before using AI enhancement", "error");
+      aiToast.error("Please write your own summary first", {
+        description: "Enter your baseline content before using AI enhancement"
+      });
       return;
     }
 
     setLoading(true);
     console.log("Generate Summary From AI for", resumeInfo?.jobTitle);
     if (!resumeInfo?.jobTitle) {
-      toast("Please Add Job Title", "error");
+      aiToast.error("Job title required", {
+        description: "Please add a job title before generating AI suggestions"
+      });
       setLoading(false);
       return;
     }
     const PROMPT = prompt.replace("{jobTitle}", resumeInfo?.jobTitle);
     try {
-      const result = await AIChatSession.sendMessage(PROMPT);
+      const result = await BackendAIChatSession.sendMessage(PROMPT, 'summary');
       const responseText = result.response.text();
       console.log("Raw AI Response:", responseText);
+
+      // Update trial status if available
+      if (result.trialStatus) {
+        updateTrialStatusFromResponse({ trialStatus: result.trialStatus });
+      }
 
       // Parse the JSON response
       let parsedResponse;
@@ -106,7 +135,9 @@ function Summary({ resumeInfo, enanbledNext, enanbledPrev }) {
         console.log("Parsed AI Response:", parsedResponse);
       } catch (parseError) {
         console.error("JSON Parse Error:", parseError);
-        toast("Error parsing AI response. Please try again.", "error");
+        aiToast.error("Error parsing AI response", {
+          description: "Please try again"
+        });
         return;
       }
 
@@ -141,7 +172,9 @@ function Summary({ resumeInfo, enanbledNext, enanbledPrev }) {
       // Validate that we have a proper array with expected structure
       if (!summaryArray || !Array.isArray(summaryArray) || summaryArray.length === 0) {
         console.error("Invalid AI response structure:", parsedResponse);
-        toast("AI returned unexpected response format. Please try again.", "error");
+        aiToast.error("AI returned unexpected response format", {
+          description: "Please try again"
+        });
         return;
       }
 
@@ -155,17 +188,23 @@ function Summary({ resumeInfo, enanbledNext, enanbledPrev }) {
 
       if (validSummaries.length === 0) {
         console.error("No valid summaries found in AI response:", summaryArray);
-        toast("AI response doesn't contain valid summaries. Please try again.", "error");
+        aiToast.error("No valid summaries found", {
+          description: "Please try again"
+        });
         return;
       }
 
       // Set the validated array
       setAiGenerateSummeryList(validSummaries);
-      toast(`AI generated ${validSummaries.length} suggestion(s) successfully! Choose one below to enhance your summary.`, "success");
+      aiToast.success(`Generated ${validSummaries.length} AI suggestion(s)`, {
+        description: "Choose one below to enhance your summary"
+      });
 
     } catch (error) {
       console.error("AI Generation Error:", error);
-      toast("Error generating AI suggestions", error.message || "Please try again");
+      aiToast.error("Failed to generate AI suggestions", {
+        description: error.message || "Please try again"
+      });
       // Reset the suggestions list on error
       setAiGenerateSummeryList(null);
     } finally {
@@ -175,29 +214,37 @@ function Summary({ resumeInfo, enanbledNext, enanbledPrev }) {
 
   return (
     <div>
-      <div className="p-5 shadow-lg rounded-lg border-t-primary border-t-4 mt-10">
-        <h2 className="font-bold text-lg">Summary</h2>
-        <p>Write your professional summary first, then use AI to enhance it</p>
+      <div className="mobile-card border-t-primary border-t-4 mt-6 sm:mt-10">
+        <h2 className="font-bold text-lg sm:text-xl">Summary</h2>
+        <p className="text-sm sm:text-base text-gray-600 mb-6">Write your professional summary first, then use AI to enhance it</p>
 
-        <form className="mt-7" onSubmit={onSave}>
-          <div className="flex justify-between items-end">
-            <label>Add Summery</label>
+        <form className="space-y-4" onSubmit={onSave}>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3">
+            <label className="text-sm font-medium text-gray-700">Professional Summary *</label>
             {hasSummaryContent ? (
-              <Button
-                variant="outline"
-                onClick={() => GenerateSummeryFromAI()}
-                type="button"
-                size="sm"
-                className="border-primary text-primary flex gap-2"
-                disabled={loading}
-              >
-                {loading ? (
-                  <LoaderCircle className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Sparkles className="h-4 w-4" />
-                )}
-                {loading ? "Generating..." : "Enhance with AI"}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="gradient"
+                  onClick={() => GenerateSummeryFromAI()}
+                  type="button"
+                  size="sm"
+                  className="btn-touch interactive-button"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      Enhance with AI
+                    </>
+                  )}
+                </Button>
+                <TrialBadge />
+              </div>
             ) : (
               <div className="text-xs text-gray-500 italic">
                 Enter your summary first to enable AI enhancement
@@ -206,15 +253,19 @@ function Summary({ resumeInfo, enanbledNext, enanbledPrev }) {
           </div>
           <Textarea
             name="summary"
-            className="mt-5"
+            className="btn-touch min-h-[120px]"
             required
             placeholder="Write a brief professional summary about yourself, your skills, and experience. Once you've written your summary, you can use AI to enhance it."
             value={summary ? summary : resumeInfo?.summary}
             onChange={handleInputChange}
           />
-          <div className="mt-2 flex justify-end">
-            <Button type="submit" disabled={loading}>
-              {loading ? <LoaderCircle className="animate-spin" /> : "Save"}
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="btn-touch w-full sm:w-auto"
+            >
+              {loading ? <LoaderCircle className="animate-spin" /> : "Save Summary"}
             </Button>
           </div>
         </form>
@@ -245,7 +296,10 @@ function Summary({ resumeInfo, enanbledNext, enanbledPrev }) {
                 <h2 className="font-bold my-1 text-primary">
                   Level: {item?.experience_level || 'General'}
                 </h2>
-                <p className="text-gray-700">{item.summary}</p>
+                <div
+                  className="text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: convertMarkdownToHTML(item.summary) }}
+                />
               </div>
             );
           })}
@@ -259,6 +313,12 @@ function Summary({ resumeInfo, enanbledNext, enanbledPrev }) {
           </p>
         </div>
       )}
+
+      {/* Trial Warning Popup */}
+      <TrialWarningPopup
+        isOpen={isWarningOpen}
+        onClose={closeWarning}
+      />
     </div>
   );
 }

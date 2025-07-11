@@ -11,7 +11,7 @@ import EducationalPreview from "./preview-components/EducationalPreview";
 import SkillsPreview from "./preview-components/SkillsPreview";
 import ProjectPreview from "./preview-components/ProjectPreview";
 import CertificationsPreview from "./preview-components/CertificationsPreview";
-import EducationTrainingPreview from "./preview-components/EducationTrainingPreview";
+
 
 function PreviewPage() {
   const resumeData = useSelector((state) => state.editResume.resumeData);
@@ -61,10 +61,10 @@ function PreviewPage() {
       {/* Resume Preview */}
       <div
         id="resume-preview"
-        className={`shadow-lg bg-white border-t-[20px] min-h-[297mm] max-w-[210mm] mx-auto`}
+        className={`mobile-resume-preview shadow-lg bg-white border-t-[20px] min-h-[297mm]`}
         style={{
           borderColor: resumeData?.themeColor ? resumeData.themeColor : "#000000",
-          padding: "56px", // 20mm margins converted to pixels (20mm * 96dpi / 25.4)
+          padding: "40px 32px", // Responsive padding: smaller on mobile
           lineHeight: "1.5",
           fontSize: "14px",
         }}
@@ -102,62 +102,23 @@ function PreviewPage() {
           </div>
         )}
 
-        {/* Three-Column Section: Certifications, Education/Training, Skills */}
-        <div className="grid grid-cols-3 gap-6 mt-6 break-inside-avoid" style={{ pageBreakInside: 'avoid' }}>
-          {/* Left Column: Certifications */}
-          <div className="break-inside-avoid" style={{ pageBreakInside: 'avoid' }}>
-            {resumeData?.certifications && resumeData.certifications.length > 0 ? (
-              <CertificationsPreview resumeInfo={resumeData} />
-            ) : (
-              <div className="my-6">
-                <h2
-                  className="text-center font-bold text-sm mb-2"
-                  style={{ color: resumeData?.themeColor }}
-                >
-                  CERTIFICATIONS
-                </h2>
-                <hr style={{ borderColor: resumeData?.themeColor }} />
-                <p className="text-xs text-gray-500 text-center mt-2">No certifications added</p>
-              </div>
-            )}
-          </div>
+        {/* Conditional Sections: Only show if data exists */}
 
-          {/* Middle Column: Education/Training */}
-          <div className="break-inside-avoid" style={{ pageBreakInside: 'avoid' }}>
-            {resumeData?.educationTraining && resumeData.educationTraining.length > 0 ? (
-              <EducationTrainingPreview resumeInfo={resumeData} />
-            ) : (
-              <div className="my-6">
-                <h2
-                  className="text-center font-bold text-sm mb-2"
-                  style={{ color: resumeData?.themeColor }}
-                >
-                  EDUCATION & TRAINING
-                </h2>
-                <hr style={{ borderColor: resumeData?.themeColor }} />
-                <p className="text-xs text-gray-500 text-center mt-2">No training added</p>
-              </div>
-            )}
+        {/* Certifications Section - Only show if data exists */}
+        {resumeData?.certifications && resumeData.certifications.length > 0 &&
+         resumeData.certifications.some(cert => cert.name && cert.name.trim() !== '') && (
+          <div className="mb-6 break-inside-avoid">
+            <CertificationsPreview resumeInfo={resumeData} />
           </div>
+        )}
 
-          {/* Right Column: Skills */}
-          <div className="break-inside-avoid" style={{ pageBreakInside: 'avoid' }}>
-            {resumeData?.skills && resumeData.skills.length > 0 ? (
-              <SkillsPreview resumeInfo={resumeData} />
-            ) : (
-              <div className="my-6">
-                <h2
-                  className="text-center font-bold text-sm mb-2"
-                  style={{ color: resumeData?.themeColor }}
-                >
-                  SKILLS
-                </h2>
-                <hr style={{ borderColor: resumeData?.themeColor }} />
-                <p className="text-xs text-gray-500 text-center mt-2">No skills added</p>
-              </div>
-            )}
+        {/* Skills Section - Only show if data exists */}
+        {resumeData?.skills && resumeData.skills.length > 0 &&
+         resumeData.skills.some(skill => skill.name && skill.name.trim() !== '') && (
+          <div className="mb-6 break-inside-avoid">
+            <SkillsPreview resumeInfo={resumeData} />
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

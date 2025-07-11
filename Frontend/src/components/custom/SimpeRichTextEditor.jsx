@@ -12,10 +12,12 @@ import {
   Separator,
   Toolbar,
 } from "react-simple-wysiwyg";
-import { AIChatSession } from "@/Services/AiModel";
+import { BackendAIChatSession } from "@/Services/BackendAiService";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { Sparkles, LoaderCircle } from "lucide-react";
+import { useTrial } from "@/context/TrialContext";
+import { TrialBadge } from "./TrialCounter";
 import "./RichTextEditor.css";
 
 const PROMPT = `Please enhance and improve the following project description while preserving the user's original intent and specific project details:
@@ -51,6 +53,9 @@ function SimpeRichTextEditor({ index, onRichTextEditorChange, resumeInfo, defaul
   );
   const [loading, setLoading] = useState(false);
 
+  // Trial context
+  const { canUseAI, handleTrialExhaustion, updateTrialStatusFromResponse } = useTrial();
+
   // Check if project summary has content to enable/disable AI button
   const hasProjectSummaryContent = value && value.trim().length > 0;
 
@@ -59,6 +64,12 @@ function SimpeRichTextEditor({ index, onRichTextEditorChange, resumeInfo, defaul
   }, [value]);
 
   const GenerateSummaryFromAI = async () => {
+    // Check trial availability first
+    if (!canUseAI()) {
+      handleTrialExhaustion();
+      return;
+    }
+
     // Double-check that user has entered project summary content
     if (!hasProjectSummaryContent) {
       toast("Please write your own project description first before using AI enhancement", "error");
@@ -88,9 +99,14 @@ function SimpeRichTextEditor({ index, onRichTextEditorChange, resumeInfo, defaul
 
     try {
       console.log("Prompt", prompt);
-      const result = await AIChatSession.sendMessage(prompt);
+      const result = await BackendAIChatSession.sendMessage(prompt, 'education');
       const responseText = result.response.text();
       console.log("Raw AI Response:", responseText);
+
+      // Update trial status if available
+      if (result.trialStatus) {
+        updateTrialStatusFromResponse({ trialStatus: result.trialStatus });
+      }
 
       // Parse the JSON response
       let parsedResponse;
@@ -165,25 +181,28 @@ function SimpeRichTextEditor({ index, onRichTextEditorChange, resumeInfo, defaul
           </p>
         </div>
         {hasProjectSummaryContent ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={GenerateSummaryFromAI}
-            disabled={loading}
-            className="flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 shadow-sm"
-          >
-            {loading ? (
-              <>
-                <LoaderCircle className="h-4 w-4 animate-spin" />
-                <span className="text-sm font-medium">Enhancing...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4" />
-                <span className="text-sm font-medium">Enhance with AI</span>
-              </>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={GenerateSummaryFromAI}
+              disabled={loading || !canUseAI()}
+              className="flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 shadow-sm"
+            >
+              {loading ? (
+                <>
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                  <span className="text-sm font-medium">Enhancing...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  <span className="text-sm font-medium">Enhance with AI</span>
+                </>
+              )}
+            </Button>
+            <TrialBadge />
+          </div>
         ) : (
           <div className="text-xs text-gray-400 italic max-w-48 text-right">
             Write your project description first to enable AI enhancement

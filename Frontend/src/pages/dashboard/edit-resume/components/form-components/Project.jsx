@@ -93,25 +93,29 @@ function Project({ resumeInfo, setEnabledNext, setEnabledPrev }) {
   };
 
   return (
-    <div className="p-5 shadow-lg rounded-lg border-t-primary border-t-4 mt-10">
-      <h2 className="font-bold text-lg">Project</h2>
-      <p>Add your project details first, then use AI to enhance your descriptions</p>
-      <div>
+    <div className="mobile-card border-t-primary border-t-4 mt-6 sm:mt-10">
+      <h2 className="font-bold text-lg sm:text-xl">Projects</h2>
+      <p className="text-sm sm:text-base text-gray-600 mb-6">Add your project details first, then use AI to enhance your descriptions</p>
+
+      <div className="space-y-6">
         {projectList?.map((project, index) => (
-          <div key={index}>
-            <div className="flex justify-between my-2">
-              <h3 className="font-bold text-lg">Project {index + 1}</h3>
-              <Button
-                variant="outline"
-                className="text-red-500"
-                onClick={(e) => {
-                  removeProject(index);
-                }}
-              >
-                <Trash2 />
-              </Button>
+          <div key={index} className="border border-gray-200 rounded-lg p-4 sm:p-6 bg-gray-50">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-medium text-gray-900">Project {index + 1}</h3>
+              {projectList.length > 1 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50 btn-touch"
+                  onClick={() => {
+                    removeProject(index);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
-            <div className="grid grid-cols-2 gap-3 border p-3 my-5 rounded-lg">
+            <div className="mobile-form-grid gap-4">
               <div>
                 <label className="text-xs">Project Name</label>
                 <Input

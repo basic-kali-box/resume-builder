@@ -8,6 +8,7 @@ import Dashboard from "./pages/dashboard/Dashboard.jsx";
 import { EditResume } from "./pages/dashboard/edit-resume/[resume_id]/EditResume.jsx";
 import ViewResume from "./pages/dashboard/view-resume/[resume_id]/ViewResume.jsx";
 import AuthPage from "./pages/auth/customAuth/AuthPage.jsx";
+import Pricing from "./pages/Pricing.jsx";
 import { resumeStore } from "./store/store";
 import { Provider } from "react-redux";
 
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
   {
     element: <App />,
     children: [
+      {
+        path: "/",
+        element: <HomePage />,
+      },
       {
         path: "/dashboard",
         element: <Dashboard />,
@@ -27,15 +32,15 @@ const router = createBrowserRouter([
         path: "/dashboard/view-resume/:resume_id",
         element: <ViewResume />,
       },
+      {
+        path: "/auth/sign-in",
+        element: <AuthPage />,
+      },
+      {
+        path: "/pricing",
+        element: <Pricing />,
+      },
     ],
-  },
-  {
-    path: "/",
-    element: <HomePage />,
-  },
-  {
-    path: "/auth/sign-in",
-    element: <AuthPage />,
   },
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(

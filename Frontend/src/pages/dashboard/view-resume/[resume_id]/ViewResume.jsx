@@ -27,36 +27,40 @@ function ViewResume() {
   };
   return (
     <>
-      <div className="flex flex-col justify-center items-center">
+      <div className="flex flex-col justify-center items-center py-8 bg-gray-50">
         <div id="noPrint">
-          <div className="my-10 mx-10 md:mx-20 lg:mx-36">
-            <h2 className="text-center text-2xl font-medium">
-              Congrats! Your Ultimate AI generates Resume is ready !{" "}
+          <div className="mobile-padding my-6 sm:my-10 max-w-4xl mx-auto">
+            <h2 className="text-center mobile-subheading font-medium mb-4">
+              Congrats! Your Ultimate AI generates Resume is ready!
             </h2>
-            <p className="text-center text-gray-400">
+            <p className="text-center text-gray-600 text-sm sm:text-base mb-6 sm:mb-8">
               Now you are ready to download your resume and you can share unique
-              resume url with your friends and family{" "}
+              resume url with your friends and family
             </p>
-            <div className="flex justify-between px-44 my-10">
-              <Button onClick={HandleDownload}>Download</Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
+              <Button
+                onClick={HandleDownload}
+                className="w-full sm:w-auto btn-touch bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Download PDF
+              </Button>
               <RWebShare
                 data={{
                   text: "Hello This is My resume",
                   url: import.meta.env.VITE_BASE_URL + "/dashboard/view-resume/" + resume_id,
-                  title: "Flamingos",
+                  title: "AI Resume Builder",
                 }}
                 onClick={() => toast("Resume Shared Successfully")}
               >
-                <Button>Share</Button>
+                <Button className="w-full sm:w-auto btn-touch bg-green-600 hover:bg-green-700 text-white">
+                  Share Resume
+                </Button>
               </RWebShare>
             </div>
           </div>
         </div>
-        <div
-          className=" bg-white rounded-lg p-8 print-area"
-          style={{ width: "210mm", height: "297mm" }}
-        >
-          <div className="print">
+        <div className="mobile-resume-preview bg-white rounded-lg shadow-xl print-area mb-6">
+          <div className="print p-4 sm:p-8" style={{ minHeight: "297mm" }}>
             <ResumePreview />
           </div>
         </div>
